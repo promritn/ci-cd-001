@@ -29,8 +29,7 @@ jobs:
 
       - name: Verify cluster connection
         run: |
-          kubectl cluster-info
-          kubectl get nodes
+          kubectl get pods -n workshop-dev
 
       - name: Deploy nginx to Kubernetes
         run: |
