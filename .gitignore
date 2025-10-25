@@ -24,3 +24,7 @@ ENV/
 
 # GitHub Actions Runner
 actions-runner/
+
+# Kubernetes
+workshop-kubeconfig.yaml
+*-kubeconfig.yaml
