@@ -14,9 +14,6 @@ echo "Generating kubeconfig for ${SERVICE_ACCOUNT} in ${NAMESPACE}..."
 CLUSTER_NAME=$(kubectl config view --minify -o jsonpath='{.clusters[0].name}')
 API_SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
 
-# Get CA certificate
-CA_CERT=$(kubectl get secret -n ${NAMESPACE} $(kubectl get sa ${SERVICE_ACCOUNT} -n ${NAMESPACE} -o jsonpath='{.secrets[0].name}' 2>/dev/null || echo "") -o jsonpath='{.data.ca\.crt}' 2>/dev/null || kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
-
 # Create token for ServiceAccount (valid for 1 year)
 echo "Creating token for ServiceAccount..."
 TOKEN=$(kubectl create token ${SERVICE_ACCOUNT} -n ${NAMESPACE} --duration=8760h)
@@ -27,7 +24,7 @@ apiVersion: v1
 kind: Config
 clusters:
 - cluster:
-    certificate-authority-data: ${CA_CERT}
+    insecure-skip-tls-verify: true
     server: ${API_SERVER}
   name: ${CLUSTER_NAME}
 contexts:
