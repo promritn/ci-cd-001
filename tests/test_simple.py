@@ -32,3 +32,16 @@ def test_division():
 def test_division_by_zero():
     with pytest.raises(ValueError, match="Cannot divide by zero"):
         divide(10, 0)
+
+
+def test_app_main(capsys):
+    """Test app.py main function."""
+    import app
+    app.main()
+    captured = capsys.readouterr()
+    assert "Calculator App" in captured.out
+    assert "10 + 5 = 15" in captured.out
+    assert "10 - 5 = 5" in captured.out
+    assert "10 * 5 = 50" in captured.out
+    assert "10 / 5 = 2.0" in captured.out
+    assert "Calculator is working!" in captured.out
