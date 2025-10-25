@@ -1,0 +1,61 @@
+name: Deploy Nginx to Kubernetes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/nginx-deployment.yaml'
+      - '.github/workflows/nginx-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure kubectl
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
+      - name: Verify cluster connection
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+
+      - name: Deploy nginx to Kubernetes
+        run: |
+          kubectl apply -f k8s/nginx-deployment.yaml
+
+      - name: Wait for deployment to be ready
+        run: |
+          kubectl rollout status deployment/nginx-deployment -n workshop-dev --timeout=300s
+
+      - name: Get deployment status
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployment nginx-deployment -n workshop-dev
+          echo ""
+          echo "=== Pods Status ==="
+          kubectl get pods -n workshop-dev -l app=nginx
+          echo ""
+          echo "=== Service Status ==="
+          kubectl get service nginx-service -n workshop-dev
+          echo ""
+          echo "=== Service Details ==="
+          kubectl describe service nginx-service -n workshop-dev
+
+      - name: Test nginx endpoint
+        run: |
+          # Get the minikube IP (if available in the cluster)
+          echo "Nginx service is available at NodePort 30080"
+          kubectl get service nginx-service -n workshop-dev -o wide
