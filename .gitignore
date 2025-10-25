@@ -21,3 +21,6 @@ ENV/
 .idea/
 *.swp
 *.swo
+
+# GitHub Actions Runner
+actions-runner/
